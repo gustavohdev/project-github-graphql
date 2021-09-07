@@ -1,5 +1,5 @@
-import express from "express"
-import fetch from "node-fetch"
+import express from "express";
+import fetch from "node-fetch";
 const app = express();
 
 app.use(express.static("public"));
@@ -8,7 +8,27 @@ app.use(express.static("public"));
 
 app.get("/data", async (req, res) => {
     //res.end("Response from the API!")
-    const query = `{ viewer { login } }`;
+    //const query = `{ viewer { login } }`;
+    const query = `
+    {
+      search(query: "stars:>50000", type: REPOSITORY, first: 10) {
+        repositoryCount
+        edges {
+          node {
+            ... on Repository {
+              name
+              owner {
+                login
+              }
+              stargazers {
+                totalCount
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
     const url = "https://api.github.com/graphql";
 
     const options = {
@@ -28,7 +48,6 @@ app.get("/data", async (req, res) => {
     }
     const data = await response.json();
     res.json(data);
-    
 });
 
 app.listen(3000, () => console.log("Server ready"));
